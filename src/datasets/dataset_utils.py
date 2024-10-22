@@ -26,7 +26,7 @@ def normalize(data, data_mean, data_std):
 def get_mean_std(all_data):
     all_data = np.sort(all_data)
     data_mean = np.mean(all_data)
-    data_std = np.std(all_data[np.int(0.025 * len(all_data)): np.int(0.975 * len(all_data))])
+    data_std = np.std(all_data[int(0.025 * len(all_data)): int(0.975 * len(all_data))])
     return data_mean, data_std
 
 
