@@ -247,12 +247,13 @@ def train_pretext(model, optimizer, criterion, aug_type: aug.AugmentationTypes, 
             # Here we save a checkpoint. It is automatically registered with
             # Ray Tune and will potentially be passed as the `checkpoint_dir`
             # parameter in future iterations.
-            with tune.checkpoint_dir(step=e) as checkpoint_dir:
-                path = os.path.join(checkpoint_dir, "checkpoint")
-                torch.save(
-                    (model.state_dict(), optimizer.state_dict()), path)
+            checkpoint_dir = "./checkpoints"
+            # with tune.checkpoint_dir(step=e) as checkpoint_dir:
+            path = os.path.join(checkpoint_dir, "checkpoint")
+            torch.save(
+                (model.state_dict(), optimizer.state_dict()), path)
 
-            tune.report(loss=valid_loss, accuracy=valid_accuracy)
+            # tune.report(loss=valid_loss, accuracy=valid_accuracy)
 
         # save model if validation loss has decreased
         if valid_loss <= valid_loss_min:
