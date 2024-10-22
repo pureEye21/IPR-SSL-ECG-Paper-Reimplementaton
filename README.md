@@ -1,34 +1,47 @@
 # SSL-ECG-Paper-Reimplementaton
-Reimplementation of the paper [Sarkar and Etemad 2020 "Self-Supervised ECG Representation Learning for Emotion Recognition"](https://ieeexplore.ieee.org/document/9161416)
-
-There exist a Tensorflow 1.14 version from the original author in [this repository](https://code.engineering.queensu.ca/17ps21/SSL-ECG), however the converters to the datasets are missing
+This is the reimplementation of the paper [Sarkar and Etemad 2020 "Self-Supervised ECG Representation Learning for Emotion Recognition"](https://ieeexplore.ieee.org/document/9161416) for my course [Intelligent Pattern Recognition](https://home.iitk.ac.in/~sandhan/ipr.html) project
 
 ## Setup
 
-I use anaconda, and the guide assumes you use that too. In case you don't, I guess it is not too hard to modify the `install.sh` script to your requirenments.
+I used Python's virtual environment. Follow below steps to setup the environment
 
-Anyway, I provided two possible ways to get your conda env working:
+1.**Create a virtual environment**:
+   ```bash
+   python -m venv myenv  # Replace 'myenv' with your desired environment name
+```
 
-`conda env create -n conda-env -f sslecg.yml`
+2.**Activate the environment**:
+```bash
+source myenv/bin/activate
+```
+3.**Install required libraries**:
 
-or you execute the `install.sh` script, although you need to manually intervine all the times.
+Install all the libraries mentioned in the requirements.txt. One example is mentioned below - 
+```
+pip install torch
+```
 
-**After you did install the environment:**
+**Adding folders:**
 
-After you did install the environment, there are some more steps to do:
+After installing the environment, follow below steps
 
-create a folder `cache` on the top level, and then one for each dataset you want to use inside, so `cache/amigos`, 
-`cache/wesad` and `cache/dreamer`.
+create a folder `cache` on the top level, and then one for each dataset you want to use inside create -  `cache/dreamer`, `cache/amigos`
 
-also edit the file `src/constants.py` and change the variables towards the correct 
+create a folder `checkpoints` on the top level
+
+also edit the file `src/constants.py` and change the variables towards the correct base paths
+
 ## Mode of usage
+`src/main.py` is the start point for running the model where you can specify different types of parameters. 
 
-I uploaded the pretrained models, so you can use them like in `src/run_example.py`
+The dataset will be preprocessed and the `npy` files will be stored in `cache/dataset`
 
-If you want to use the pretraining, you also must download each of the datasets:
-- [AMIGOS](http://www.eecs.qmul.ac.uk/mmv/datasets/amigos/download.html)
+At certain checkpoints model will be saved in `checkpoints/`
+
+I uploaded the pretrained models in `src/data_model`
+
+For the pretraining purpose you must download each of the datasets:
 - [DREAMER](https://zenodo.org/record/546113#.YKLY0WYzaHs)
-- [WESAD](https://archive.ics.uci.edu/ml/datasets/WESAD+%28Wearable+Stress+and+Affect+Detection%29)
-- [DEAP](http://www.eecs.qmul.ac.uk/mmv/datasets/deap/)
+- [AMIGOS](http://www.eecs.qmul.ac.uk/mmv/datasets/amigos/download.html)
 
-All of them must be in a common folder, but you can configure this basepath in `src/constants.py`
+You must configure the basepath for the datasets in `src/constants.py`
