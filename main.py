@@ -41,12 +41,12 @@ if __name__ == '__main__':
         pt.train_pretext_full_config(pt.good_params_for_single_run, use_tune=False)
     if not args.skip_finetune_hyperparams:
         c.use_ray = True
-        ftt.train_finetune_tune_task(data.DataSets.AMIGOS, 'test_123', num_samples=args.num_finetune_experiments)
+        ftt.train_finetune_tune_task(data.DataSets.DREAMER, 'test_123', num_samples=args.num_finetune_experiments)
     c.use_ray = False
     if args.run_single_finetuning:
-        ftt.finetune_to_target_full_config(ftt.good_params_for_single_run, checkpoint_dir=None, target_dataset=data.DataSets.AMIGOS, target_id='test_123')
+        ftt.finetune_to_target_full_config(ftt.good_params_for_single_run, checkpoint_dir=None, target_dataset=data.DataSets.DREAMER, target_id='test_123')
     if args.run_example_classification:
-        re.run_example(data.DataSets.AMIGOS, 'test_123')
+        re.run_example(data.DataSets.DREAMER, 'test_123')
     if args.run_unittests:
         ecgcnn_tests.test_cnn_basic_dimensions()
         ecgcnn_tests.test_single_head_loss()
