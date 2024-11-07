@@ -2,6 +2,7 @@ import numpy as np
 import src.utils as utils
 import torch
 from ray import tune
+from ray import train
 import os.path
 from enum import Enum
 
@@ -43,7 +44,7 @@ def iterate_batches(loader, optimizer, scaler, batch_size, train_on_gpu: bool, c
 
 
 def std_train_loop(epochs, batch_size, train_loader, valid_loader, model, optimizer, schedulder, use_scaler, compute_loss_and_accuracy, save_model, train_on_gpu: bool, use_tune:bool):
-    valid_loss_min = np.Inf  # track change in validation loss
+    valid_loss_min = np.inf  # track change in validation loss
 
     scaler = None
     if use_scaler:
@@ -95,12 +96,13 @@ def std_train_loop(epochs, batch_size, train_loader, valid_loader, model, optimi
             # Here we save a checkpoint. It is automatically registered with
             # Ray Tune and will potentially be passed as the `checkpoint_dir`
             # parameter in future iterations.
-            with tune.checkpoint_dir(step=e) as checkpoint_dir:
-                path = os.path.join(checkpoint_dir, "checkpoint")
-                torch.save(
-                    (model.state_dict(), optimizer.state_dict()), path)
+            #checkpoint_dir = "/scratch/dhruv21/code/checkpoints"
+            #  with tune.checkpoint_dir(step=e) as checkpoint_dir:
+            #path = os.path.join(checkpoint_dir, "checkpoint")
+            #torch.save(
+            	#(model.state_dict(), optimizer.state_dict()), path)
 
-            tune.report(loss=valid_loss, accuracy=valid_accuracy)
+            train.report({"loss":valid_loss, "accuracy":valid_accuracy})
 
         # save model if validation loss has decreased
         if valid_loss <= valid_loss_min:

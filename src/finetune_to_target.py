@@ -25,7 +25,7 @@ basepath_to_tuned_model: str = c.model_base_path + "tuned/"
 class TuningParams:
     batch_size:int = 32
     num_workers:int = 1#2
-    epochs:int = 200
+    epochs:int = 5
     valid_size = 0.2
     test_size = 0.1
 
@@ -54,7 +54,7 @@ def binary_labels(labels):
     return labels
 
 
-def train_finetune_tune_task(target_dataset: dta.DataSets, target_id, num_samples=10, max_num_epochs=200, gpus_per_trial=0.5):
+def train_finetune_tune_task(target_dataset: dta.DataSets, target_id, num_samples=10, max_num_epochs=5, gpus_per_trial=1):
     config = {
         "finetune": {
             "batch_size": tune.choice([8, 16, 32, 64, 128]),
@@ -79,7 +79,8 @@ def train_finetune_tune_task(target_dataset: dta.DataSets, target_id, num_sample
         metric="loss",
         mode="min",
         num_samples=num_samples,
-        scheduler=scheduler
+        scheduler=scheduler,
+	storage_path="/scratch/dhruv21"
     )
 
     utils.print_ray_overview(result, 'finetuning')
@@ -100,11 +101,11 @@ def train_finetune_tune_task(target_dataset: dta.DataSets, target_id, num_sample
         if torch.cuda.device_count() > 1:
             best_trained_model = nn.DataParallel(best_trained_model)
 
-    checkpoint_path = os.path.join(best_trial.checkpoint.value, "checkpoint")
+    # checkpoint_path = os.path.join(best_trial.checkpoint.value, "checkpoint")
 
     device = 'cuda' if train_on_gpu else 'cpu'
-    model_state, optimizer_state = torch.load(checkpoint_path, map_location=device)
-    best_trained_model = utils.save_load_state_dict(best_trained_model, model_state)
+    # model_state, optimizer_state = torch.load(checkpoint_path, map_location=device)
+    # best_trained_model = utils.save_load_state_dict(best_trained_model, model_state)
 
     print('------------------------------------------------------------------------------')
     print('               Saving best model from hyperparam search                       ')
@@ -121,7 +122,8 @@ def finetune_to_target_full_config(hyperparams_config, checkpoint_dir=None, targ
     dataset = dta.ds_to_constructor[target_dataset](dta.DataConstants.basepath)
 
     does_not_matter = len(dta.AugmentationsPretextDataset.STD_AUG) + 1
-    ecg_net = EcgNetwork(does_not_matter, dataset.target_size)
+    x = 10
+    ecg_net = EcgNetwork(does_not_matter, x)
     model = EcgAmigosHead(2)
     model.debug_values = False
     embedder = ecg_net.cnn
@@ -164,12 +166,12 @@ def finetune_to_target_full_config(hyperparams_config, checkpoint_dir=None, targ
 
     # The `checkpoint_dir` parameter gets passed by Ray Tune when a checkpoint
     # should be restored.
-    if checkpoint_dir:
-        checkpoint = os.path.join(checkpoint_dir, "checkpoint")
-        device = 'cuda' if train_on_gpu else 'cpu'
-        model_state, optimizer_state = torch.load(checkpoint, map_location=device)
-        model = utils.save_load_state_dict(model, model_state)
-        optimizer.load_state_dict(optimizer_state)
+    # if checkpoint_dir:
+    #     checkpoint = os.path.join(checkpoint_dir, "checkpoint")
+    #     device = 'cuda' if train_on_gpu else 'cpu'
+    #     model_state, optimizer_state = torch.load(checkpoint, map_location=device)
+    #     model = utils.save_load_state_dict(model, model_state)
+    #     optimizer.load_state_dict(optimizer_state)
 
     train_on_gpu = torch.cuda.is_available()
     if train_on_gpu:

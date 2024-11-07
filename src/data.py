@@ -24,17 +24,17 @@ class DataConstants:
 
 
 class DataSets(Enum):
-    AMIGOS = 0
+    # AMIGOS = 0
     DREAMER = 1
-    WESAD = 2
-    SWELL = 3
+    # WESAD = 2
+    # SWELL = 3
 
 
 ds_to_constructor = {
-    DataSets.AMIGOS: amigos.ECGAmigosCachedWindowsDataset,
+    # DataSets.AMIGOS: amigos.ECGAmigosCachedWindowsDataset,
     DataSets.DREAMER: dreamer.ECGDreamerCachedWindowsDataset,
-    DataSets.WESAD: wesad.ECGWesadCachedWindowsDataset,
-    DataSets.SWELL: swell.ECGSwellCachedWindowsDataset
+    # DataSets.WESAD: wesad.ECGWesadCachedWindowsDataset,
+    # DataSets.SWELL: swell.ECGSwellCachedWindowsDataset
 }
 
 

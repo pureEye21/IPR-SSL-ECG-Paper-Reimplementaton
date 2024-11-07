@@ -8,6 +8,8 @@ import torch
 import torch.backends.cudnn
 import torch.nn as nn
 from ray import tune
+from ray import ray
+from ray import train
 from ray.tune.schedulers import ASHAScheduler
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
@@ -24,7 +26,7 @@ path_to_model: str = c.model_base_path
 class PretextParams:
     batch_size:int = 32  # don't forget we get all the agumentations per example
     num_workers:int = 3
-    epochs:int = 100
+    epochs:int = 5
     valid_size = 0.2
     test_size = 0.1
     pin_memory = True
@@ -39,7 +41,7 @@ good_params_for_single_run = {
 }
 
 
-def train_pretext_tune_task(num_samples=10, max_num_epochs=150, gpus_per_trial=0.5):
+def train_pretext_tune_task(num_samples=10, max_num_epochs=5, gpus_per_trial=1):
     config = {
         "pretext": {
             "batch_size": tune.choice([8, 16, 32, 64, 128]),
@@ -65,6 +67,7 @@ def train_pretext_tune_task(num_samples=10, max_num_epochs=150, gpus_per_trial=0
         mode="min",
         num_samples=num_samples,
         scheduler=scheduler,
+        storage_path="/scratch/dhruv21",
         log_to_file=True
     )
 
@@ -82,10 +85,10 @@ def train_pretext_tune_task(num_samples=10, max_num_epochs=150, gpus_per_trial=0
         if gpus_per_trial > 1:
             best_trained_model = nn.DataParallel(best_trained_model)
 
-    checkpoint_path = os.path.join(best_trial.checkpoint.value, "checkpoint")
-
-    model_state, optimizer_state = torch.load(checkpoint_path)
-    best_trained_model.load_state_dict(model_state)
+    #checkpoint_path = os.path.join(best_trial.checkpoint.value, "checkpoint")
+    #checkpoint_path ="/scratch/dhruv21/code/checkpoint/"
+    #model_state, optimizer_state = torch.load(checkpoint_path)
+    #best_trained_model.load_state_dict(model_state)
 
     print('------------------------------------------------------------------------------')
     print('               Saving best model from hyperparam search                       ')
@@ -157,7 +160,7 @@ def train_pretext(model, optimizer, schedulder, criterion, train_on_gpu: bool, p
     test_loader = DataLoader(dataset, batch_size=p.batch_size,
                              sampler=test_sampeler, num_workers=p.num_workers)
 
-    valid_loss_min = np.Inf  # track change in validation loss
+    valid_loss_min = np.inf  # track change in validation loss
 
     ltv = partial(labels_to_vec, n_tasks=len(dataset.augmentations) + 1, debug_ltv=False)  # just a shortcut
 
@@ -254,13 +257,13 @@ def train_pretext(model, optimizer, schedulder, criterion, train_on_gpu: bool, p
             # Here we save a checkpoint. It is automatically registered with
             # Ray Tune and will potentially be passed as the `checkpoint_dir`
             # parameter in future iterations.
-            checkpoint_dir = "./checkpoints"
             # with tune.checkpoint_dir(step=e) as checkpoint_dir:
-            path = os.path.join(checkpoint_dir, "checkpoint")
-            torch.save(
-                (model.state_dict(), optimizer.state_dict()), path)
+            #checkpoint_dir = "/scratch/dhruv21/code/checkpoint/"
+            #path = "/scratch/dhruv21/code/checkpoint/"
+            #torch.save(
+                #(model.state_dict(), optimizer.state_dict()), path)
 
-            # tune.report(loss=valid_loss, accuracy=valid_accuracy)
+            train.report({"loss":valid_loss, "accuracy":valid_accuracy})
 
         # save model if validation loss has decreased
         if valid_loss <= valid_loss_min:
